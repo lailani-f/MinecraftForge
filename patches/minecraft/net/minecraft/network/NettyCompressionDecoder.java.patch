@@ -1,0 +1,19 @@
+--- ../src-base/minecraft/net/minecraft/network/NettyCompressionDecoder.java
++++ ../src-work/minecraft/net/minecraft/network/NettyCompressionDecoder.java
+@@ -33,16 +33,7 @@
+             }
+             else
+             {
+-                if (i < this.field_179304_b)
+-                {
+-                    throw new DecoderException("Badly compressed packet - size of " + i + " is below server threshold of " + this.field_179304_b);
+-                }
+ 
+-                if (i > 2097152)
+-                {
+-                    throw new DecoderException("Badly compressed packet - size of " + i + " is larger than protocol maximum of " + 2097152);
+-                }
+-
+                 byte[] abyte = new byte[packetbuffer.readableBytes()];
+                 packetbuffer.readBytes(abyte);
+                 this.field_179305_a.setInput(abyte);

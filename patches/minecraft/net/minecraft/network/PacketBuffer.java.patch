@@ -1,5 +1,14 @@
 --- ../src-base/minecraft/net/minecraft/network/PacketBuffer.java
 +++ ../src-work/minecraft/net/minecraft/network/PacketBuffer.java
+@@ -312,7 +312,7 @@
+ 
+             try
+             {
+-                return CompressedStreamTools.func_152456_a(new ByteBufInputStream(this), new NBTSizeTracker(2097152L));
++                return CompressedStreamTools.func_152456_a(new ByteBufInputStream(this), NBTSizeTracker.field_152451_a);
+             }
+             catch (IOException ioexception)
+             {
 @@ -336,7 +336,7 @@
  
              if (p_150788_1_.func_77973_b().func_77645_m() || p_150788_1_.func_77973_b().func_77651_p())
