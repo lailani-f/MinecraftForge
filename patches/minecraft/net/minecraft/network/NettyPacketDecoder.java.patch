@@ -1,0 +1,62 @@
+--- ../src-base/minecraft/net/minecraft/network/NettyPacketDecoder.java
++++ ../src-work/minecraft/net/minecraft/network/NettyPacketDecoder.java
+@@ -4,7 +4,16 @@
+ import io.netty.channel.ChannelHandlerContext;
+ import io.netty.handler.codec.ByteToMessageDecoder;
+ import java.io.IOException;
++import java.nio.file.Files;
++import java.nio.file.Path;
++import java.nio.file.Paths;
++import java.nio.file.StandardOpenOption;
+ import java.util.List;
++
++import net.minecraft.nbt.NBTTagCompound;
++import net.minecraft.network.play.server.SPacketChunkData;
++import net.minecraft.tileentity.TileEntity;
++import net.minecraft.util.math.BlockPos;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ import org.apache.logging.log4j.Marker;
+@@ -23,7 +32,8 @@
+ 
+     protected void decode(ChannelHandlerContext p_decode_1_, ByteBuf p_decode_2_, List<Object> p_decode_3_) throws IOException, InstantiationException, IllegalAccessException, Exception
+     {
+-        if (p_decode_2_.readableBytes() != 0)
++        int size = p_decode_2_.readableBytes();
++        if (size != 0)
+         {
+             PacketBuffer packetbuffer = new PacketBuffer(p_decode_2_);
+             int i = packetbuffer.func_150792_a();
+@@ -37,6 +47,12 @@
+             {
+                 packet.func_148837_a(packetbuffer);
+ 
++                if (size > 2097152L) {
++                    field_150800_a.info("Received abnormally large packet 'Size: " + size + " Type: " + packet.getClass().getName() + "'");
++                    TryLogChunkPacket(packet);
++                }
++
++
+                 if (packetbuffer.readableBytes() > 0)
+                 {
+                     throw new IOException("Packet " + ((EnumConnectionState)p_decode_1_.channel().attr(NetworkManager.field_150739_c).get()).func_150759_c() + "/" + i + " (" + packet.getClass().getSimpleName() + ") was larger than I expected, found " + packetbuffer.readableBytes() + " bytes extra whilst reading packet " + i);
+@@ -53,4 +69,19 @@
+             }
+         }
+     }
++
++    private void TryLogChunkPacket(Packet<?> packet) throws IOException {
++        if (packet instanceof SPacketChunkData) {
++            SPacketChunkData packetIn = (SPacketChunkData)packet;
++            field_150800_a.info("'At rectangle 'x1:" + (packetIn.func_149273_e() << 4) + " y1: " + 0 + " z1: " + (packetIn.func_149271_f() << 4) + " x2: " + ((packetIn.func_149273_e() << 4) + 15) + " y2: " + 256 + " z2: " + ((packetIn.func_149271_f() << 4) + 15) + "'"  );
++
++            for (NBTTagCompound nbttagcompound : packetIn.func_189554_f())
++            {
++                BlockPos blockpos = new BlockPos(nbttagcompound.func_74762_e("x"), nbttagcompound.func_74762_e("y"), nbttagcompound.func_74762_e("z"));
++
++                Path file = Paths.get("nbt/" + blockpos.func_177958_n() + "." + blockpos.func_177956_o() + "." + blockpos.func_177952_p() + ".json");
++                Files.write(file, nbttagcompound.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.DSYNC);
++            }
++        }
++    }
+ }
